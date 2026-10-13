@@ -1,0 +1,9 @@
+node_modules/
+.policy-data/
+output/
+dist/
+.playwright-cli/
+*.tgz
+.env
+.env.*
+!.env.example

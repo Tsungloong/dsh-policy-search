@@ -1,0 +1,42 @@
+{
+  "repository": "https://github.com/magnus919/agent-skills",
+  "commit": "2e8fb962819b2b01b270620f92f0cc7213d77ef1",
+  "files": [
+    {
+      "path": "skills/policy-office/upstream/SKILL.md",
+      "sha256": "210e8572af3b6ed9afe2ebc64ebde645c591fba6526ac3ab570c57d8e568e7ae"
+    },
+    {
+      "path": "skills/policy-office/upstream/references/excel.md",
+      "sha256": "37232b9e736eb83b0ced5bdba94606d3f976ff17c66eac6b49ee9273402f2d5f"
+    },
+    {
+      "path": "skills/policy-office/upstream/references/word.md",
+      "sha256": "e8c5753fc22df79a3d3073695dded0b361992cf91e23b8449c7981da1ace33a8"
+    },
+    {
+      "path": "skills/policy-office/upstream/references/pdf.md",
+      "sha256": "32d5db843d3b6680e32d5dac1dfe8692248a65928f4f1e381ce4126c38a79f43"
+    },
+    {
+      "path": "skills/policy-office/upstream/references/output-quality.md",
+      "sha256": "1d5d4daa8bdc16e348620cd590539a3a000d7e1eb21674904d77e92306b13ca6"
+    },
+    {
+      "path": "skills/policy-office/upstream/templates/excel-template.md",
+      "sha256": "ccd5d64739c3fe29de47541383f0ca43c4c7547dc9b32e5c5b3d339c81568385"
+    },
+    {
+      "path": "skills/policy-office/upstream/templates/word-template.md",
+      "sha256": "286e48bcae93d6346733cfe4acb8c01c649c5ac93da98e6ab26e8a8f41faa19d"
+    },
+    {
+      "path": "skills/policy-office/upstream/templates/pdf-template.md",
+      "sha256": "9a851ebb13a04f27d9bd984e93d95b30ee19422f4a00832861418e734eee2adf"
+    },
+    {
+      "path": "skills/policy-office/upstream/scripts/validate-documents.py",
+      "sha256": "7a4084b3217dd9b3024d4b0010a896c8d710a73f2eb73dc5747d0e34c37ba63e"
+    }
+  ]
+}

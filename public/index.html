@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>政策寻源 · 企业扶持工作台</title><link rel="stylesheet" href="/style.css"></head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="政策寻源首页"><span class="seal">政</span><span>政策寻源<small>DSH POLICY SEARCH</small></span></a>
+    <p class="side-label">研究工作台</p>
+    <button class="nav active" id="new-search">⌕　政策检索</button>
+    <div class="history-heading"><span>最近任务</span><button id="refresh-history" title="刷新任务列表" aria-label="刷新任务列表">↻</button></div>
+    <div id="history" class="history"></div>
+    <div class="side-foot"><span class="dot"></span> 本地保存 · 官方来源优先<br><small>0.1.0 / DeepSeek Harness 插件</small></div>
+  </aside>
+  <main>
+    <header><div class="eyebrow">企业服务 / 政策情报</div><span class="edition">证据可追溯的政策简报</span></header>
+    <section class="intro"><div><p class="kicker">从政策原文，到行动依据</p><h1>让扶持政策，<br>找到需要它的企业。</h1><p class="lede">检索政府与园区信息，提取申报条件与补贴标准。<br>每条结论，都能回到原文。</p></div><div class="intro-note"><span>01 — 04</span><p>检索发现<br>原文提取<br>证据核对<br>简报交付</p></div></section>
+    <div id="message" class="message" role="status" aria-live="polite" hidden></div>
+    <section class="search-panel" aria-labelledby="search-heading">
+      <div class="section-heading"><h2 id="search-heading">建立检索任务</h2><span>聚焦主题，提高命中质量</span></div>
+      <form id="search-form">
+        <label for="query">扶持主题</label><div class="query-row"><input id="query" name="query" maxlength="200" required value="中小企业稳岗补贴、场地减免" placeholder="例如：高新技术企业研发补助"><button class="primary" id="submit" type="submit">开始检索 <span>↗</span></button></div>
+        <div class="form-grid"><label>地区<input id="region" placeholder="不限，例如：广东"></label><label>行业<input id="industry" placeholder="不限，例如：制造业"></label><label>扶持类型<input id="policyType" placeholder="不限，例如：补贴"></label><label>处理上限<select id="limit"><option value="8">8 篇</option><option value="15">15 篇</option><option value="30">30 篇</option></select></label></div>
+        <details><summary>来源、日期与模型设置</summary><div class="advanced">
+          <div class="form-grid three"><label>发布日期起<input id="from" type="date"></label><label>发布日期止<input id="to" type="date"></label><label>DSH 模型<select id="model"><option value="">正在读取模型…</option></select></label></div>
+          <fieldset><legend>官网目录（无可用搜索结果时扫描）</legend><div id="sources" class="source-options"></div></fieldset>
+          <label>指定政策原文网址<textarea id="urls" rows="3" placeholder="每行一个 HTTP(S) 政策原文地址。gov.cn 域名可直接使用；其他园区或政务平台须在插件 allowedHosts 配置中添加。"></textarea></label>
+          <p class="hint">日期筛选按提取的发布日期执行。无明确日期的政策在启用日期筛选时会被排除。目录扫描受处理上限约束，不保证穷尽全国政策。</p>
+        </div></details>
+        <div class="form-footer"><p id="connection">正在连接工作台…</p><button type="button" id="demo" class="text-button" hidden>体验虚构示例 →</button></div>
+      </form>
+    </section>
+    <section id="results" aria-labelledby="result-heading" hidden>
+      <div class="result-top"><div><p class="eyebrow">检索成果</p><h2 id="result-heading">政策简报</h2></div><span id="job-status" class="badge"></span></div>
+      <div class="progress-row"><p id="progress" role="status" aria-live="polite"></p><button id="cancel" class="text-button" hidden>取消任务</button></div>
+      <p id="coverage" class="coverage"></p>
+      <div class="stats"><div><strong id="count">0</strong><span>匹配政策</span></div><div><strong id="unknown">0</strong><span>期限待核实</span></div><div><strong id="failures">0</strong><span>未完成来源</span></div><div class="export-actions"><button data-export="xlsx">↓ Excel</button><button data-export="docx">↓ Word</button><button data-export="pdf">↓ PDF</button><button data-export="json">↓ 证据 JSON</button></div></div>
+      <div class="table-wrap"><table><thead><tr><th>政策与来源</th><th>扶持类型 / 地区</th><th>申报截止</th><th>补贴标准</th><th>核对证据</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <div id="empty" class="empty" hidden>当前没有匹配政策。检查来源、错误提示，或放宽筛选条件。</div>
+      <details id="error-panel" hidden><summary>查看未完成来源</summary><ul id="errors"></ul></details>
+      <p class="disclaimer">截止日期提示不等于政策仍有效或企业具备申报资格。请核对主管部门最新通知后再申报。</p>
+    </section>
+    <section id="initial" class="initial"><span class="initial-icon">▤</span><div><h2>把信息整理，交给工作台。</h2><p>结果将包含申请条件、补贴标准、申报日期与逐字段证据，支持三种办公格式导出。</p></div></section>
+    <footer>政策寻源 <span>来源有据 · 不确定项可见 · 简报可编辑</span></footer>
+  </main>
+  <dialog id="detail"><div class="dialog-head"><h2>原文证据</h2><button id="close-detail" aria-label="关闭证据面板">×</button></div><div id="detail-body"></div></dialog>
+  <script type="module" src="/app.js"></script>
+</body></html>

@@ -1,0 +1,68 @@
+{
+  "name": "dsh-policy-search",
+  "version": "0.1.0",
+  "description": "中国企业扶持政策搜索、证据核验与简报工作台 — DeepSeek Harness 插件",
+  "type": "module",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "dsh-policy-search": "./src/cli.js"
+  },
+  "files": [
+    "src",
+    "public",
+    "assets",
+    "skills",
+    "docs",
+    "cordis.patch.yml",
+    "README.md",
+    "NOTICE.md",
+    "Start-Demo.cmd",
+    "start-demo.sh"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "engines": {
+    "node": ">=22.19"
+  },
+  "scripts": {
+    "start": "node src/cli.js",
+    "demo": "node src/cli.js --demo",
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check.js",
+    "pack:release": "node scripts/release.js"
+  },
+  "dependencies": {
+    "cheerio": "1.2.0",
+    "docx": "9.5.1",
+    "exceljs": "4.4.0",
+    "ipaddr.js": "2.3.0",
+    "pdfjs-dist": "5.4.624",
+    "pdfkit": "0.17.2",
+    "robots-parser": "3.0.1",
+    "undici": "7.30.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
+  },
+  "bundledDependencies": ["exceljs"],
+  "peerDependencies": {
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "4.0.4",
+    "@deepseek-ai/dsh-llm": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-skill": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-tools": "0.2.0-rc.2",
+    "@deepseek-ai/dsh-web": "0.2.0-rc.2"
+  }
+}
