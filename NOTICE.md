@@ -7,7 +7,7 @@
 | 政策检索参考 | dongwei6688/policy-search-china-skill，`7cf075676b7d9738b881bb7d17b32ed9d236216b` | 参考功能和原文溯源思路，未复制执行代码或缓存；原项目 MIT |
 | documents 办公技能 | magnus919/agent-skills，`2e8fb962819b2b01b270620f92f0cc7213d77ef1` | 保留所需上游文件，MIT；版权和许可在 `skills/policy-office/LICENSE.upstream.md` |
 | Noto Sans CJK SC | notofonts/noto-cjk；固定提交见 `assets/font-source.json` | PDF 嵌入字体；SIL Open Font License 1.1，原文在 `assets/FONT-LICENSE.txt` |
-| DSH / Cordis 接口 | deepseek-ai/deepseek-harness；测试 npm 0.2.0-rc.2 / Cordis 4.0.4 | 通过 npm 使用官方接口；各包自带许可 |
+| DSH / Cordis 接口 | deepseek-ai/deepseek-harness；测试 npm 0.2.1-rc.2 / Cordis 4.0.5 | 通过 npm 使用官方接口；各包自带许可 |
 | ExcelJS / docx / PDFKit | package-lock.json 固定版本 | 办公文件生成；各依赖保留原包许可证 |
 | PDF.js / Cheerio / Undici / robots-parser / ipaddr.js | package-lock.json 固定版本 | 正文解析、安全请求及来源检查；各依赖保留原包许可证 |
 

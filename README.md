@@ -8,22 +8,33 @@
 
 ## 安装到 DSH
 
-当前验证基线：**DeepSeek Harness 0.2.0-rc.2、Node.js 22.19+ / 24**。旧版宿主尚未验证，不要直接覆盖现有 DSH 配置。
+当前版本 **0.1.1**，验证基线为 **DeepSeek Harness 0.2.1-rc.2、Node.js 24**。本版明确要求 `@deepseek-ai/dsh-tools@0.2.1-rc.2`，不扩大到未验证的宿主版本；旧 DSH 0.2.0-rc.2 请继续使用插件 0.1.0。
 
-1. 从本私密仓库的 Release 下载 `dsh-policy-search-0.1.0.tgz`。
+1. 从本私密仓库的 Release 下载 `dsh-policy-search-0.1.1.tgz`。
 2. 用 DSH 自带的终端和 Node 环境安装本地包（将示例改成真实绝对路径）：
 
    ```sh
-   dsh plugin --profile web add /absolute/path/dsh-policy-search-0.1.0.tgz
+   dsh plugin --profile web add /absolute/path/dsh-policy-search-0.1.1.tgz
    ```
 
-   Windows 也支持带引号的路径，例如 `"F:\Downloads\dsh-policy-search-0.1.0.tgz"`。首次安装需要访问 npm 安装依赖，不依赖 npm 私有仓库，也不会发布到 npm。
+   Windows 也支持带引号的路径，例如 `"F:\Downloads\dsh-policy-search-0.1.1.tgz"`。首次安装需要访问 npm 安装依赖，不依赖 npm 私有仓库，也不会发布到 npm。
 3. 重启对应 DSH profile。在 DSH 中配置模型；如果需要搜索引擎发现候选，也配置一个 DSH 网页搜索提供商。
 4. 在对话中说：**“打开政策寻源工作台”**。`policy_workbench` 返回仅供本机使用的带访问凭据链接。打开后选择模型、主题、地区和来源，点击“开始检索”。
 
 插件自动注册 `policy-search` 与 `policy-office` 两个技能，以及 `policy_workbench`、`policy_search`、`policy_job`、`policy_office` 四个工具。不会替换宿主模型配置、读取或迁移用户密钥。
 
 如果没有网页搜索服务，会明确提示并扫描选中的官网目录；可直接粘贴具体政策网址。目录扫描的覆盖范围有限，不能替代全网搜索。
+
+### 从 0.1.0 更新
+
+DSH 0.2.1-rc.2 的插件页若提示旧包不兼容，先停用并卸载 **dsh-policy-search@0.1.0**，再用该页的本地安装入口安装新的 TGZ，并按提示重启。CLI 可在同一个 profile 中执行：
+
+```sh
+dsh plugin --profile web remove dsh-policy-search
+dsh plugin --profile web add /absolute/path/dsh-policy-search-0.1.1.tgz
+```
+
+卸载前记下插件的自定义配置，安装后恢复原值；不要删除 `$DSH_HOME/policy-search`（或原先设置的 `dataDir`）。本次升级不改变任务 JSON、数据路径、工具名或技能名。无需设置版本豁免或关闭兼容性检查。npm 的 `latest` 标签可能仍指向旧版 DSH，开发依赖按已验证的候选版精确锁定。
 
 ## 工作台与输出
 
@@ -82,6 +93,6 @@ Windows/Linux 演示启动脚本在 `Start-Demo.cmd` 和 `start-demo.sh`。依�
 
 ## 验收范围与限制
 
-见 [设计与需求映射](docs/DESIGN.md)、[部署与操作](docs/DEPLOYMENT.md) 和 [验证记录](docs/VERIFICATION.md)。
+见 [设计与需求映射](docs/DESIGN.md)、[部署与操作](docs/DEPLOYMENT.md)、[0.1.1 兼容性验证](docs/VERIFICATION-0.1.1.md) 和 [0.1.0 原始验证记录](docs/VERIFICATION.md)。
 
 本版是可安装的 DSH 插件与可运行的演示程序，不是独立 Windows EXE。没有全量政策库、后台持续监控、自动申报或自动判定最终法律效力。扫描 PDF OCR、必须执行 JavaScript/登录才能读取的网页会明确失败。中国政府网站的可达性、反爬和模型准确率需在实际部署持续关注；单次有限检索不能承诺“全国所有最新政策”。
