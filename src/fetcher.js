@@ -6,7 +6,7 @@ import { load } from 'cheerio';
 import { setTimeout as delay } from 'node:timers/promises';
 import { canonicalUrl, normalize } from './policy.js';
 
-export const USER_AGENT = 'DSHPolicySearch/0.1 (+policy research; respects robots.txt)';
+export const USER_AGENT = 'DSHPolicySearch/0.2 (+policy research; respects robots.txt)';
 export function isPublicAddress(address) {
   try {
     let parsed = ipaddr.parse(address);
@@ -14,11 +14,11 @@ export function isPublicAddress(address) {
     return parsed.range() === 'unicast';
   } catch { return false; }
 }
-export function validateUrl(raw, extraHosts = []) {
+export function validateUrl(raw) {
   const u = new URL(raw);
   if (!['https:', 'http:'].includes(u.protocol) || u.username || u.password || (u.port && !['80', '443'].includes(u.port))) throw new Error('只允许无凭据的 HTTP(S) 公共网站地址');
-  const host = u.hostname.toLowerCase();
-  if (!(host === 'gov.cn' || host.endsWith('.gov.cn') || extraHosts.includes(host))) throw new Error(`未授权来源域名：${host}。园区/政务平台域名须在插件配置 allowedHosts 中明确添加`);
+  const host = u.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (host === 'localhost' || host.endsWith('.localhost') || (ipaddr.isValid(host) && !isPublicAddress(host))) throw new Error('只允许公共网站地址');
   return u;
 }
 
@@ -43,31 +43,15 @@ export function extractHtml(html, url) {
 }
 
 export class SafeFetcher {
-  constructor({ allowedHosts = [], timeoutMs = 20000, maxBytes = 5 * 1024 * 1024, dnsResolver = 'system' } = {}) {
-    if (!['system', 'alidns'].includes(dnsResolver)) throw new Error('dnsResolver 只支持 system 或 alidns');
-    this.dnsResolver = dnsResolver; this.dnsCache = new Map();
-    this.allowedHosts = allowedHosts; this.timeoutMs = timeoutMs; this.maxBytes = maxBytes;
+  constructor({ timeoutMs = 20000, maxBytes = 5 * 1024 * 1024 } = {}) {
+    this.timeoutMs = timeoutMs; this.maxBytes = maxBytes;
     this.robots = new Map(); this.last = new Map();
   }
-  async resolve(hostname, signal) {
-    if (this.dnsResolver === 'system') return lookup(hostname, { all: true });
-    const cached = this.dnsCache.get(hostname);
-    if (cached && cached.expires > Date.now()) return cached.addresses;
-    // Opt-in public DNS-over-HTTPS: validate and pin the returned public address.
-    // This never permits the fake-IP/private destination itself.
-    const response = await request(`https://dns.alidns.com/resolve?name=${encodeURIComponent(hostname)}&type=A`, { signal: AbortSignal.any([signal ?? new AbortController().signal, AbortSignal.timeout(this.timeoutMs)]), headers: { accept: 'application/dns-json' } });
-    if (response.statusCode !== 200) { response.body.destroy(); throw new Error(`公共 DNS 查询失败：HTTP ${response.statusCode}`); }
-    let json = ''; for await (const chunk of response.body) { json += chunk.toString('utf8'); if (json.length > 65536) { response.body.destroy(); throw new Error('DNS 响应超限'); } }
-    const data = JSON.parse(json);
-    const answers = (data.Answer ?? []).filter(a => a.type === 1);
-    const addresses = answers.map(a => ({ address: a.data, family: 4 }));
-    if (!addresses.length || addresses.some(a => !isPublicAddress(a.address))) throw new Error('公共 DNS 没有返回可用的公共地址');
-    this.dnsCache.set(hostname, { addresses, expires: Date.now() + Math.min(300, ...answers.map(a => Math.max(1, a.TTL || 1))) * 1000 });
-    return addresses;
-  }
   async raw(raw, signal, maxBytes = this.maxBytes, redirects = 0, checkRobots = false) {
-    const u = validateUrl(raw, this.allowedHosts);
-    const addresses = await this.resolve(u.hostname, signal);
+    const u = validateUrl(raw);
+    signal?.throwIfAborted();
+    const addresses = await lookup(u.hostname, { all: true });
+    signal?.throwIfAborted();
     if (!addresses.length || addresses.some(a => !isPublicAddress(a.address))) throw new Error('来源域名解析到非公共网络，已拒绝连接');
     const address = addresses[0];
     const crawlDelay = (this.robots.get(u.origin)?.getCrawlDelay('DSHPolicySearch') ?? 0) * 1000;
@@ -83,7 +67,7 @@ export class SafeFetcher {
         response.body.destroy();
         if (redirects >= 4 || !response.headers.location) throw new Error('网页重定向次数超限或缺少目标');
         const next = new URL(response.headers.location, u).href;
-        validateUrl(next, this.allowedHosts);
+        validateUrl(next);
         if (checkRobots) await this.checkRobots(next, signal);
         return this.raw(next, signal, maxBytes, redirects + 1, checkRobots);
       }
@@ -99,7 +83,7 @@ export class SafeFetcher {
     } finally { await agent.close(); }
   }
   async checkRobots(url, signal) {
-    const u = validateUrl(url, this.allowedHosts);
+    const u = validateUrl(url);
     let rules = this.robots.get(u.origin);
     if (!rules) {
       const r = await this.raw(`${u.origin}/robots.txt`, signal, 512 * 1024);
@@ -132,7 +116,7 @@ export class SafeFetcher {
           const page = await pdf.getPage(i), content = await page.getTextContent();
           text += content.items.map(x => x.str + (x.hasEOL ? '\n' : ' ')).join('') + '\n';
         }
-        if (normalize(text).length < 40) throw new Error('PDF 无可提取文本，可能为扫描件，需要 OCR/人工复核');
+        if (!normalize(text)) throw new Error('PDF 无可提取文本，可能为扫描件，需要 OCR/人工复核');
         doc = { title: decodeURIComponent(new URL(r.url).pathname.split('/').pop()), text: text.slice(0, 60000), truncated: text.length > 60000, links: [] };
       } finally { await task.destroy(); }
     } else {
@@ -144,6 +128,29 @@ export class SafeFetcher {
       doc = extractHtml(html, r.url);
       if (doc.text.length < 60 || /验证码|访问验证|安全验证|Access Denied|Checking your browser/i.test(doc.title)) throw new Error('正文不足或网站需要交互验证，请人工查看来源');
     }
-    return { ...doc, url: r.url, fetchedAt: new Date().toISOString(), sourceKind: new URL(r.url).hostname.endsWith('.gov.cn') ? '政府网站' : '自定义园区/政务平台' };
+    return { ...doc, url: r.url, fetchedAt: new Date().toISOString(), sourceKind: sourceKind(r.url) };
   }
+}
+
+export function sourceKind(url) {
+  const host = new URL(url).hostname;
+  return host === 'gov.cn' || host.endsWith('.gov.cn') ? '政府域名（仍需核对发布机关）' : '公开网站（发布主体待核对）';
+}
+
+// DSH owns HTML/text retrieval. Its current web seam does not return binary PDF,
+// so only explicit PDF reads use the existing bounded binary fetcher.
+export async function readSource(web, url, format = 'auto', signal) {
+  const target = validateUrl(url);
+  signal?.throwIfAborted();
+  if (format === 'pdf' || (format === 'auto' && /\.pdf$/i.test(target.pathname))) return new SafeFetcher().page(target.href, signal);
+  if (!web) throw new Error('DSH 网页读取服务不可用；请启用宿主网页读取能力。办公制作不受影响。');
+  const result = await web.fetch({ url: target.href }, signal);
+  signal?.throwIfAborted();
+  validateUrl(result.url);
+  if (result.statusCode < 200 || result.statusCode >= 300) throw new Error(`网页 HTTP ${result.statusCode}，未提取正文`);
+  const body = result.body;
+  if (!['html', 'text'].includes(body.kind)) throw new Error('宿主未返回网页文本；PDF 请使用 format=pdf');
+  const doc = body.kind === 'html' ? extractHtml(body.content, result.url) : { title: '', text: body.content.slice(0, 60000), truncated: body.content.length > 60000, links: [] };
+  if (!normalize(doc.text) || /验证码|访问验证|安全验证|Access Denied|Checking your browser/i.test(doc.title)) throw new Error('正文为空或网站需要交互验证，请查看来源');
+  return { ...doc, truncated: !!(doc.truncated || result.truncated), url: result.url, fetchedAt: new Date().toISOString(), sourceKind: sourceKind(result.url) };
 }

@@ -11,6 +11,6 @@
 | ExcelJS / docx / PDFKit | package-lock.json 固定版本 | 办公文件生成；各依赖保留原包许可证 |
 | PDF.js / Cheerio / Undici / robots-parser / ipaddr.js | package-lock.json 固定版本 | 正文解析、安全请求及来源检查；各依赖保留原包许可证 |
 
-上游办公技能未被原地改写，`upstream-lock.json` 记录其逐文件 SHA-256。新增 DSH 入口限定政策场景、用 Node 导出器替代 Python 生成依赖，并明确区分结构验证与渲染验证。上游总入口仅作为来源记录，不是插件的活动技能入口；PPTX、其他关联技能和 fixtures 未集成。
+上游办公技能未被原地改写，`upstream-lock.json` 保留原始版本记录。DSH 入口支持独立办公制作与政策结果导出，用 Node 生成器替代上游 Python 生成依赖。上游总入口仅作为来源记录，不是插件的活动技能入口；PPTX、其他关联技能和 fixtures 未集成。
 
 字体未作修改，不单独销售。文件随包交付用于离线生成中文 PDF。原始用户 DOCX 未放入仓库，仓库仅记录功能需求映射。
